@@ -2,15 +2,33 @@ from django.db import transaction
 from .models import HeaderCheck, CheckItem
 from invertory.models import Stock
 from django.core.exceptions import ValidationError
+import redis
+import os
+from datetime import datetime
 
-def create_check(space, branch, number, number_kassa, items):
+redis_url = os.environ.get('REDIS_URL')
+
+redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
+
+def create_check(space, branch, number_kassa, items):
+
+    current_date_str = datetime.now().strftime('%Y%m%d')
+
+    redis_key = f'check:couter:branch:{branch.id}:date:{current_date_str}'
+    next_number = redis_client.incr(redis_key)
+    if next_number == 1:
+        redis_client.expire(redis_key, 129600)
+    
+    formatted_number = str(next_number).zfill(4)
+    final_check_number = f'CH-{current_date_str} - {formatted_number}'
+
     with transaction.atomic():
         header_check = HeaderCheck.objects.create(
-            space=space,
-            branch=branch,
-            number=number,
-            number_kassa=number_kassa,
-            total_amount=0 # Инициализируем нулем
+            space = space,
+            branch = branch,
+            number = final_check_number,
+            number_kassa = number_kassa,
+            total_amount = 0 
         )
         
         total_amount = 0
@@ -29,13 +47,12 @@ def create_check(space, branch, number, number_kassa, items):
                 if stock_item.quantity < quantity:
                     raise ValidationError(f"Недостаточно товара {stock_item.recept.name}")
 
-                # 2. Берем цену из базы, а не из запроса!
+                
                 current_price = stock_item.price 
-
                 stock_item.quantity -= quantity
                 stock_item.save()
 
-                # 3. Создаем позицию
+               
                 check_item = CheckItem.objects.create(
                     header_check=header_check,
                     recept=stock_item.recept,
@@ -46,10 +63,15 @@ def create_check(space, branch, number, number_kassa, items):
                 
                 total_amount += check_item.total_price
 
+                
+                
+
             except Stock.DoesNotExist:
                 raise ValidationError("Товар отсутствует на складе данного филиала.")
         
         header_check.total_amount = total_amount
         header_check.save()
+
+
         
         return header_check

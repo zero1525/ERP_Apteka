@@ -22,7 +22,7 @@ class HeaderCheckAdmin(admin.ModelAdmin):
     list_filter = ('date', 'branch')
     inlines = [CheckItemInline]
     
-    readonly_fields = ('total_amount','date')
+    readonly_fields = ('total_amount','date',)
     
     fieldsets = (
         ("Основная информация", {
@@ -31,6 +31,9 @@ class HeaderCheckAdmin(admin.ModelAdmin):
         ("Финансы", {
             'fields': ('total_amount',),
         }),
+        ('Дополнительная информация', {
+            'fields':('space', 'date', 'number_kassa')
+        })
     )
 
     def total_amount_display(self, obj):
