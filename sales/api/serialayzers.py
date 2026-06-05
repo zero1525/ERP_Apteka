@@ -3,16 +3,15 @@ from ..models import CheckItem, HeaderCheck
 from ..service import create_check
 
 class CheckItemSerializer(ModelSerializer):
-    model = CheckItem
-    fields = ['recept_id', 'quantity']
+    class Meta:
+        model = CheckItem
+        fields = 'recept', 'quantity'
 
 class HeaderCheckSerializer(ModelSerializer):
-   
     items = CheckItemSerializer(many=True)
-
     class Meta:
         model = HeaderCheck
-        fields = ['branch', 'number_kassa', 'items']
+        fields = 'branch', 'number_kassa', 'items'
         
     def create(self, validated_data):
         user = self.context['request'].user

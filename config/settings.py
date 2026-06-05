@@ -98,10 +98,26 @@ AUTH_USER_MODEL = 'accounts.User'
 
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+USE_POSTGRES = env("USE_POSTGRES", cast=bool, default=False)
+
+if USE_POSTGRES:
+    DATABASES = {
+        'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env ('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD':env ('DB_PASSWORD'),
+        'HOST' : env('DB_HOST'),
+        'PORT': env('DB_PORT')
+    }
+    }
+    print(f"--- DATABASE STATUS: USING POSTGRESQL ({USE_POSTGRES}) ---")
+
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

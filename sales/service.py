@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError
 import redis
 import os
 from datetime import datetime
+from django.core.exceptions import ObjectDoesNotExist
+from recepts.models import Barcode, Recepts
 
 redis_url = os.environ.get('REDIS_URL')
 
@@ -63,15 +65,21 @@ def create_check(space, branch, number_kassa, items):
                 
                 total_amount += check_item.total_price
 
-                
-                
-
             except Stock.DoesNotExist:
                 raise ValidationError("Товар отсутствует на складе данного филиала.")
         
         header_check.total_amount = total_amount
         header_check.save()
 
-
-        
         return header_check
+    
+
+
+
+def get_product_by_barcode(barcode_str: str) -> Recepts:
+
+    if not barcode_str:
+        raise ValueError("Штрихкод не может быть пустым")
+        
+    barcode_obj = Barcode.objects.select_related('recept').get(code=barcode_str)
+    return barcode_obj.recept

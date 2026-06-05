@@ -1,0 +1,25 @@
+
+venv/
+venv_linux/
+.venv/
+env/
+
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Локальные базы данных и логи
+*.sqlite3
+*.log
+
+# Секретные файлы (их мы прокидываем через окружение, а не запекаем в образ!)
+.env
+
+# Папки IDE и системные файлы
+.git/
+.gitignore
+.idea/
+.vscode/
+.DS_Store
+.medicines

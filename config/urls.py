@@ -12,6 +12,8 @@ urlpatterns = [
     path('auth/', include('accounts.api.urls')),
     path('hr/', include('hr.api.routers')),
     path('invertory/', include('invertory.api.routers')),
+    path('sales/', include('sales.api.routers')),
+    path('product/', include('recepts.api.routers'))
 ]
 
 if settings.DEBUG:

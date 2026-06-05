@@ -30,8 +30,8 @@ class Manufacturer(models.Model):
 class Recepts(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название лекарства")
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='recepts', verbose_name="Категория", blank=True, null=True)
-    manufacturer = models.ForeignKey(Manufacturer, on_delete=models.CASCADE, related_name='recepts', verbose_name="Производитель", blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category', verbose_name="Категория", blank=True, null=True)
+    manufacturer = models.ForeignKey(Manufacturer, on_delete=models.CASCADE, related_name='manufacturer', verbose_name="Производитель", blank=True, null=True)
     image = models.ImageField(upload_to='medicines/', blank=True, null=True, verbose_name="Фото")
     is_prescription_required = models.BooleanField(default=False, verbose_name="По рецепту")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
@@ -45,7 +45,7 @@ class Recepts(models.Model):
         return self.name
 
 class Barcode(models.Model):
-    recept = models.ForeignKey(Recepts, on_delete=models.CASCADE, related_name='barcodes', verbose_name="Лекарство")
+    recept = models.ForeignKey(Recepts, on_delete=models.CASCADE, related_name='barcode', verbose_name="Лекарство")
     code = models.CharField(max_length=255, unique=True, verbose_name="Штрихкод")
     volume = models.CharField(max_length=255, blank=True, null=True, verbose_name="Объем")
     UNIT_CHOICES = (

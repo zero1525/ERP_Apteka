@@ -8,6 +8,11 @@ from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db.models import Count
+from recepts.models import Recepts
+from recepts.api.serializers import ReceptSerializer
+from ..service import get_product_by_barcode
+from rest_framework import status
+from django.core.exceptions import ObjectDoesNotExist
 
 class ChecItemViewSets(ModelViewSet):
     queryset = CheckItem.objects.all()
@@ -62,6 +67,23 @@ class ChecItemViewSets(ModelViewSet):
         )
         response['Content-Disposition'] = 'attachment; filename="check_report.xlsx"'
         return response
+    
+    def find_by_barcode(self, request):
+        barcode_str = request.data.get('barcode')
+        
+        try:
+            product = get_product_by_barcode(barcode_str)
+            serializer = ReceptSerializer(product, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
+        except ObjectDoesNotExist:
+            return Response(
+                {'error': f'Товар со штрихкодом {barcode_str} не найден'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class HeaderCheckViewSets(ModelViewSet):
@@ -71,4 +93,4 @@ class HeaderCheckViewSets(ModelViewSet):
     def perform_create(self, serializer):
         create_object_for_user_space(HeaderCheck, self.request.user, serializer.validated_data)
 
-    
+
